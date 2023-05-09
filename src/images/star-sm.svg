@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="94.448" height="15.513" viewBox="0 0 94.448 15.513">
+  <g id="star-sm" transform="translate(0 0.4)">
+    <g id="Page-1">
+      <g id="Core">
+        <g id="star">
+          <path id="Shape" d="M7.71,11.775l4.765,2.873L11.214,9.23,15.42,5.585,9.876,5.109,7.71,0,5.544,5.109,0,5.585,4.206,9.23,2.945,14.649Z" fill="#5283da" fill-rule="evenodd"/>
+        </g>
+      </g>
+    </g>
+    <g id="Page-1-2" data-name="Page-1" transform="translate(58.763)">
+      <g id="Core-2" data-name="Core">
+        <g id="star-half">
+          <path id="Shape-2" data-name="Shape" d="M15.42,5.085,9.876,4.609,7.71-.5,5.544,4.609,0,5.085,4.206,8.73,2.945,14.149,7.71,11.275l4.765,2.873L11.214,8.729,15.42,5.085ZM7.71,9.828V2.657L9.028,5.769l3.377.29L9.844,8.278l.768,3.3-2.9-1.75Z" transform="translate(0 0.5)" fill="#5283da" fill-rule="evenodd"/>
+        </g>
+      </g>
+    </g>
+    <g id="Page-1-3" data-name="Page-1" transform="translate(19.588)">
+      <g id="Core-3" data-name="Core">
+        <g id="star-2" data-name="star">
+          <path id="Shape-3" data-name="Shape" d="M7.71,11.775l4.765,2.873L11.214,9.23,15.42,5.585,9.876,5.109,7.71,0,5.544,5.109,0,5.585,4.206,9.23,2.945,14.649Z" fill="#5283da" fill-rule="evenodd"/>
+        </g>
+      </g>
+    </g>
+    <g id="Page-1-4" data-name="Page-1" transform="translate(39.176)">
+      <g id="Core-4" data-name="Core">
+        <g id="star-3" data-name="star">
+          <path id="Shape-4" data-name="Shape" d="M7.71,11.775l4.765,2.873L11.214,9.23,15.42,5.585,9.876,5.109,7.71,0,5.544,5.109,0,5.585,4.206,9.23,2.945,14.649Z" fill="#5283da" fill-rule="evenodd"/>
+        </g>
+      </g>
+    </g>
+    <g id="_172558_star_icon" data-name="172558_star_icon" transform="translate(79.351 0.771)">
+      <rect id="Rectangle_33" data-name="Rectangle 33" width="15" height="14" transform="translate(-0.351 0.229)" fill="none"/>
+      <path id="Path_18559" data-name="Path 18559" d="M9.605,3.553l1.617,4.232,4.488.244-3.489,2.859,1.157,4.383L9.605,12.807,5.832,15.271l1.157-4.383L3.5,8.029l4.488-.244Z" transform="translate(-2.582 -2.623)" fill="none" stroke="#5283da" stroke-miterlimit="10" stroke-width="1.5"/>
+    </g>
+  </g>
+</svg>
