@@ -33,8 +33,13 @@ import {
   Top3LeadersData,
   Mycontributions,
 } from "./InterfaceTypes";
+import { useStore } from "../../hooks/useStore";
 
 function Dashboard(): JSX.Element {
+  const {
+    rootStore: { userStore },
+  } = useStore();
+
   const ls = new SecureLS();
   const dispatch = useDispatch<AppDispatch>();
   const bg = [
@@ -59,7 +64,8 @@ function Dashboard(): JSX.Element {
     dispatch(totalViewsFun());
     dispatch(totalDownload());
     dispatch(totalComponents());
-    dispatch(fetchUserProfile(data));
+    // dispatch(fetchUserProfile(data));
+    userStore.fetchUser(data);
     dispatch(mostViewed("week"));
     dispatch(myContribution());
     dispatch(pendingItems());
@@ -81,16 +87,17 @@ function Dashboard(): JSX.Element {
     (state: any) => state?.totalComponents
   );
 
-  const { fetchUserProfileData } = useSelector(
-    (state: any) => state?.fetchUserProfile
-  );
+  // const { fetchUserProfileData } = useSelector(
+  //   (state: any) => state?.fetchUserProfile
+  // );
   const { mostViewedData } = useSelector((state: any) => state?.mostViewed);
   const tokenString: string = getToken();
 
   var decoded: any = jwt_decode(tokenString);
 
   const data = { search: decoded?.email };
-  const fullName = fetchUserProfileData?.payload?.[0]?.name;
+  // const fullName = fetchUserProfileData?.payload?.[0]?.name;
+  const fullName: any = userStore?.user[0]?.name;
 
   const { leaderboardData } = useSelector(
     (state: any) => state?.leaderboardData
@@ -187,7 +194,7 @@ function Dashboard(): JSX.Element {
     0,
     noOfpendingItem
   );
-  
+
   const loadMoreIncpendingItem = () => {
     setNoOfpendingItem(noOfpendingItem + pendingItemDataNumber);
   };

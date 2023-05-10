@@ -9,7 +9,13 @@ import { AppDispatch } from "../../redux/store";
 import { roleName, getToken } from "./auth/authUser";
 import { Permissions } from "../../constants/PermissionConstant";
 import SecureLS from "secure-ls";
-function Component_Header() {
+import { useStore } from "../../hooks/useStore";
+import { observer } from "mobx-react-lite";
+
+const Component_Header = () => {
+  const {
+    rootStore: { userStore },
+  } = useStore();
   // get urlPath name
   const location = useLocation();
   const ls: any = new SecureLS();
@@ -24,6 +30,11 @@ function Component_Header() {
     }
   }, [decoded.exp, location, ls, navigate]);
 
+  useEffect(() => {
+    profileFun();
+    console.log("fullName", fullName);
+  }, []);
+
   const refreshTokenFun = async () => {
     var tokenData = ls?.get("refreshtoken");
 
@@ -33,19 +44,22 @@ function Component_Header() {
 
   const data: any = { search: decoded?.email };
 
-  const profileFun = async () => {
-    const profileData: any = await dispatch(fetchUserProfile(data));
+  const profileFun = () => {
+    // const profileData: any = await dispatch(fetchUserProfile(data));
 
-    var Name: any = profileData?.payload?.[0]?.name;
+    // var Name: any = profileData?.payload?.[0]?.name;
+    // ls?.set("username", { data: Name });
+    // ls?.set("userImg", { data: profileData?.payload?.[0]?.image });
+
+    userStore.fetchUser(data);
+
+    var Name: any = userStore?.user[0]?.name;
     ls?.set("username", { data: Name });
-    ls?.set("userImg", { data: profileData?.payload?.[0]?.image });
+    ls?.set("userImg", { data: userStore?.user[0]?.image });
   };
+
   const fullName = ls?.get("username")?.data;
   const profileImage: any = ls?.get("userImg")?.data;
-  console.log(profileImage);
-  useEffect(() => {
-    profileFun();
-  }, []);
 
   return (
     <Fragment>
@@ -161,6 +175,6 @@ function Component_Header() {
       </header>
     </Fragment>
   );
-}
+};
 
-export default Component_Header;
+export default observer(Component_Header);
