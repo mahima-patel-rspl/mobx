@@ -1,7 +1,4 @@
-import axios from "axios";
-// import { action, computed, makeObservable, observable } from "mobx";
 import { IRootStore } from "./RootStore";
-import { getToken } from "../components/pages/auth/authUser";
 import { action, computed, makeObservable, observable } from "mobx";
 import { postFunction } from "../components/common/AxiosInstance";
 

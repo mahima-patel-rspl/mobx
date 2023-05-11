@@ -34,10 +34,11 @@ import {
   Mycontributions,
 } from "./InterfaceTypes";
 import { useStore } from "../../hooks/useStore";
+import { observer } from "mobx-react-lite";
 
 function Dashboard(): JSX.Element {
   const {
-    rootStore: { userStore },
+    rootStore: { userStore, dashTopCategoriesStore },
   } = useStore();
 
   const ls = new SecureLS();
@@ -59,7 +60,8 @@ function Dashboard(): JSX.Element {
   const location = useLocation();
   useEffect(() => {
     document.body.className = "app nav-light d-flex flex-column h-100";
-    dispatch(topcategories(10));
+    // dispatch(topcategories(10));
+    dashTopCategoriesStore.fetchCategories(10);
     dispatch(RecentlyAdded());
     dispatch(totalViewsFun());
     dispatch(totalDownload());
@@ -71,6 +73,11 @@ function Dashboard(): JSX.Element {
     dispatch(pendingItems());
     dispatch(favouritesList());
     dispatch(leaderboards(leaderBoardoptions));
+
+    console.log(
+      "DashTopCategoriesStore",
+      dashTopCategoriesStore.categories[0].id
+    );
   }, []);
   //debugger;
   useEffect(() => {
@@ -79,7 +86,9 @@ function Dashboard(): JSX.Element {
 
   const [techStackId] = useState<Array<string>>([]);
   const [dataId, setDataId] = useState<object>([]);
-  const { categories } = useSelector((state: any) => state?.topcategories);
+  // const { categories } = useSelector((state: any) => state?.topcategories);
+  const categoriesList = dashTopCategoriesStore.categories;
+
   const { Recentlydata } = useSelector((state: any) => state?.RecentlyAdded);
   const { totalViews } = useSelector((state: any) => state?.totalViews);
   const { totalDownloads } = useSelector((state: any) => state?.totalDownload);
@@ -115,7 +124,7 @@ function Dashboard(): JSX.Element {
   // load More Data
   const datanumber = 4;
   const [noOfComponent, setNoOfComponent] = useState(datanumber);
-  const SearchData = categories?.payload?.slice(0, noOfComponent);
+  // const SearchData = categories?.payload?.slice(0, noOfComponent);
   const loadMore = () => {
     setNoOfComponent(noOfComponent + datanumber);
   };
@@ -298,33 +307,29 @@ function Dashboard(): JSX.Element {
                   </div>
                   <div className="categories_list">
                     <ul>
-                      {categories?.payload?.map(
-                        (item: TopCategoriesData, index: number) => {
-                          return (
-                            <Fragment>
-                              <li>
-                                <div
-                                  className={`categories_img   ${bg[index]}`}
-                                >
-                                  <img
-                                    style={{ height: "90px", width: "90px" }}
-                                    src={item?.avatar_url}
-                                    alt="avtarImage"
-                                  />
-                                  <span className="badge badge-pill badge-primary">
-                                    {item?.total_components}
-                                  </span>
-                                </div>
-                                <div className="categories_label">
-                                  <Link to={`/Search_list/${item?.name}`}>
-                                    {item?.name}
-                                  </Link>
-                                </div>
-                              </li>
-                            </Fragment>
-                          );
-                        }
-                      )}
+                      {categoriesList?.map((item: any, index: number) => {
+                        return (
+                          <Fragment>
+                            <li>
+                              <div className={`categories_img   ${bg[index]}`}>
+                                <img
+                                  style={{ height: "90px", width: "90px" }}
+                                  src={item?.avatar_url}
+                                  alt="avtarImage"
+                                />
+                                <span className="badge badge-pill badge-primary">
+                                  {item?.total_components}
+                                </span>
+                              </div>
+                              <div className="categories_label">
+                                <Link to={`/Search_list/${item?.name}`}>
+                                  {item?.name}
+                                </Link>
+                              </div>
+                            </li>
+                          </Fragment>
+                        );
+                      })}
                     </ul>
                   </div>
                 </div>
@@ -905,7 +910,7 @@ function Dashboard(): JSX.Element {
               </div>
               <div className="modal-body">
                 <div className="grid_wrapper grid-4 chooseint_wrapper">
-                  {SearchData?.map((data: SearchData) => {
+                  {/* {SearchData?.map((data: SearchData) => {
                     return (
                       <Fragment>
                         <div className="custom-control custom-checkbox image-checkbox">
@@ -931,9 +936,10 @@ function Dashboard(): JSX.Element {
                         </div>
                       </Fragment>
                     );
-                  })}
+                  })} */}
+                  4
                 </div>
-                {categories?.payload?.length > noOfComponent ? (
+                {/* {categories?.payload?.length > noOfComponent ? (
                   <div className="d-flex align-items-center justify-content-center py-4">
                     <Link
                       to=""
@@ -943,7 +949,7 @@ function Dashboard(): JSX.Element {
                       Load More
                     </Link>
                   </div>
-                ) : null}
+                ) : null} */}
               </div>
               <div className="modal-footer">
                 <button type="submit" className="btn btn-primary">
@@ -962,4 +968,4 @@ function Dashboard(): JSX.Element {
   );
 }
 
-export default Dashboard;
+export default observer(Dashboard);
