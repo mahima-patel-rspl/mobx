@@ -1,27 +1,17 @@
-import {
-  DashTopCategoriesStore,
-  MostViewedStore,
-  RecentlyAddedStore,
-} from "./DashboardStore";
+import { DashboardStore } from "./dashboardStore";
 import { UserStore } from "./UserStore";
 
 export interface IRootStore {
   userStore: UserStore;
-  dashTopCategoriesStore: DashTopCategoriesStore;
-  recentlyAddedStore: RecentlyAddedStore;
-  mostViewedStore: MostViewedStore;
+  dashboardStore: DashboardStore;
 }
 
 export class RootStore implements IRootStore {
   userStore: UserStore;
-  dashTopCategoriesStore: DashTopCategoriesStore;
-  recentlyAddedStore: RecentlyAddedStore;
-  mostViewedStore: MostViewedStore;
+  dashboardStore: DashboardStore;
 
   constructor() {
     this.userStore = new UserStore(this);
-    this.dashTopCategoriesStore = new DashTopCategoriesStore(this);
-    this.recentlyAddedStore = new RecentlyAddedStore(this);
-    this.mostViewedStore = new MostViewedStore(this);
+    this.dashboardStore = new DashboardStore(this);
   }
 }

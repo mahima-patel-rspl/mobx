@@ -7,59 +7,65 @@ import {
   TopCategoriesData,
 } from "../components/pages/InterfaceTypes";
 
-//Dashboard - Top categories store
-// export interface IDashTopCategories {
-//   avatar_url: string | null;
-//   categoryId: number;
-//   categoryName: string;
-//   id: number;
-//   name: string;
-//   total_components: number;
-//   total_views: string;
-//   web_url: string;
-// }
+// Dashboard Store
 
-export class DashTopCategoriesStore {
-  categories: TopCategoriesData[] = [];
+//Interfaces
+export interface ITotalComponents {
+  components: number;
+}
+export interface ITotalViews {
+  payload: number;
+}
+export interface ITotalDownloads {
+  payload: number;
+}
+
+export class DashboardStore {
   rootStore: IRootStore;
+
+  categories: TopCategoriesData[] = [];
+  recentlyAddedItems: RecentlyData[] = [];
+  mostViewedData: MostViewedData[] = [];
+  components: ITotalComponents | undefined;
+  payloadViews: ITotalViews | undefined;
+  payloadDownloads: ITotalDownloads | undefined;
 
   constructor(rootStore: IRootStore) {
     makeObservable(this, {
       categories: observable,
       fetchCategories: action,
       getCategories: computed,
+      recentlyAddedItems: observable,
+      fetchAddedItems: action,
+      getAddedItems: computed,
+      mostViewedData: observable,
+      fetchMostViewedData: action,
+      getMostViewedData: computed,
+      components: observable,
+      fetchComponents: action,
+      getComponents: computed,
+      payloadViews: observable,
+      fetchViews: action,
+      getViews: computed,
+      payloadDownloads: observable,
+      fetchDownloads: action,
+      getDownloads: computed,
     });
     this.rootStore = rootStore;
   }
-
+  // Top categories
   async fetchCategories(limit: any) {
     const getData: any = await fetchFunction(
       `api/techstack/top?limit=${limit}`
     );
     this.categories = getData.payload;
-    // console.log("getData----->", getData.payload);
-    // console.log("this.categories----->", this.categories);
   }
 
   get getCategories() {
     return this.categories;
   }
-}
 
-//Dashboard - Recently Added store
-export class RecentlyAddedStore {
-  recentlyAddedItems: RecentlyData[] = [];
-  rootStore: IRootStore;
-
-  constructor(rootStore: IRootStore) {
-    makeObservable(this, {
-      recentlyAddedItems: observable,
-      fetchAddedItems: action,
-      getAddedItems: computed,
-    });
-    this.rootStore = rootStore;
-  }
-
+  // Recently Added
   async fetchAddedItems() {
     const getData: any = await fetchFunction("api/component/recent");
     this.recentlyAddedItems = getData.payload;
@@ -68,32 +74,43 @@ export class RecentlyAddedStore {
   get getAddedItems() {
     return this.recentlyAddedItems;
   }
-}
 
-//Dashboard - Most Viewed store
-export class MostViewedStore {
-  mostViewedData: MostViewedData[] = [];
-  rootstore: IRootStore;
-
-  constructor(rootStore: IRootStore) {
-    makeObservable(this, {
-      mostViewedData: observable,
-      fetchMostViewedData: action,
-      getMostViewedData: computed,
-    });
-
-    this.rootstore = rootStore;
-  }
-
+  //Most Viewed
   async fetchMostViewedData(duration: any) {
     const getData: any = await fetchFunction(
       `api/dashboard/mostviewed?duration=${duration}`
     );
     this.mostViewedData = getData.payload;
-    console.log("getData----->", getData.payload);
   }
 
   get getMostViewedData() {
     return this.mostViewedData;
+  }
+
+  // Total component
+  async fetchComponents() {
+    const getData: any = await fetchFunction("api/dashboard/totalcomponents");
+    this.components = getData.payload;
+  }
+  get getComponents() {
+    return this.components;
+  }
+
+  // Total views
+  async fetchViews() {
+    const getData: any = await fetchFunction("api/dashboard/views");
+    this.payloadViews = getData;
+  }
+  get getViews() {
+    return this.payloadViews;
+  }
+
+  // Total downloads
+  async fetchDownloads() {
+    const getData: any = await fetchFunction("api/dashboard/downloads");
+    this.payloadDownloads = getData;
+  }
+  get getDownloads() {
+    return this.payloadDownloads;
   }
 }
