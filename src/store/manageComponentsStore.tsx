@@ -1,7 +1,13 @@
 import { action, computed, makeObservable, observable } from "mobx";
-import { Techstacks } from "../components/pages/InterfaceTypes";
+import {
+  ManageComponents,
+  Techstacks,
+} from "../components/pages/InterfaceTypes";
 import { IRootStore } from "./RootStore";
-import { fetchFunction } from "../components/common/AxiosInstance";
+import {
+  fetchFunction,
+  postFunction,
+} from "../components/common/AxiosInstance";
 
 export interface IAdminTagList {
   feature_tags: {
@@ -11,7 +17,6 @@ export interface IAdminTagList {
     type: string;
     updatedAt: string;
   };
-
   frameworks: [
     {
       id: number;
@@ -44,9 +49,9 @@ export class ManageComponentStore {
 
   techStacks: Techstacks[] = [];
   adminTagList: IAdminTagList | undefined;
+  manageComponentList: ManageComponents[] = [];
 
   constructor(rootStore: IRootStore) {
-    this.rootStore = rootStore;
     makeObservable(this, {
       techStacks: observable,
       fetchTechstacks: action,
@@ -54,7 +59,12 @@ export class ManageComponentStore {
       adminTagList: observable,
       fetchAdminTagList: action,
       getAdminTagList: computed,
+      manageComponentList: observable,
+      fetchManageComponents: action,
+      getManageComponents: computed,
     });
+
+    this.rootStore = rootStore;
   }
 
   //tech stack list
@@ -71,10 +81,22 @@ export class ManageComponentStore {
   async fetchAdminTagList() {
     const getData: any = await fetchFunction("api/tag/list");
     this.adminTagList = getData.payload;
-    console.log(this.adminTagList);
   }
 
   get getAdminTagList() {
     return this.adminTagList;
+  }
+
+  //manage component post
+  async fetchManageComponents(dataObj: any) {
+    const getData: any = await postFunction(
+      `api/component/managecomponent`,
+      dataObj
+    );
+    this.manageComponentList = getData.payload;
+  }
+
+  get getManageComponents() {
+    return this.manageComponentList;
   }
 }
