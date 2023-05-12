@@ -31,9 +31,15 @@ const Component_Header = () => {
   }, [decoded.exp, location, ls, navigate]);
 
   useEffect(() => {
-    profileFun();
-    console.log("fullName", fullName);
+    userStore.fetchUser(data);
   }, []);
+
+  var Name: any = userStore?.user[0]?.name;
+  ls?.set("username", { data: Name });
+  ls?.set("userImg", { data: userStore?.user[0]?.image });
+
+  const fullName = ls?.get("username")?.data;
+  const profileImage: any = ls?.get("userImg")?.data;
 
   const refreshTokenFun = async () => {
     var tokenData = ls?.get("refreshtoken");
@@ -43,23 +49,6 @@ const Component_Header = () => {
   };
 
   const data: any = { search: decoded?.email };
-
-  const profileFun = () => {
-    // const profileData: any = await dispatch(fetchUserProfile(data));
-
-    // var Name: any = profileData?.payload?.[0]?.name;
-    // ls?.set("username", { data: Name });
-    // ls?.set("userImg", { data: profileData?.payload?.[0]?.image });
-
-    userStore.fetchUser(data);
-
-    var Name: any = userStore?.user[0]?.name;
-    ls?.set("username", { data: Name });
-    ls?.set("userImg", { data: userStore?.user[0]?.image });
-  };
-
-  const fullName = ls?.get("username")?.data;
-  const profileImage: any = ls?.get("userImg")?.data;
 
   return (
     <Fragment>
