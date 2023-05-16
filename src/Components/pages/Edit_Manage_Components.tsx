@@ -16,26 +16,40 @@ import { Autocomplete, TextField } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
 import ComponentNavbar from "./componentNavbar";
 import { roleName, userPermission } from "./auth/authUser";
-import { AllTags, AdminTagList } from "./InterfaceTypes";
+// import { AllTags, AdminTagList } from "./InterfaceTypes";
 import { Permissions } from "../../constants/PermissionConstant";
+import { ManageComponentStore } from "../../store/manageComponentsStore";
+import { useStore } from "../../hooks/useStore";
+import { observer } from "mobx-react-lite";
 function Edit_Manage_Components() {
+  const {
+    rootStore: { manageComponentStore },
+  } = useStore();
+  // console.log(
+  //   "manageComponentStore",
+  //   manageComponentStore.adminEditManageComponent
+  // );
+
   const dispatch = useDispatch<AppDispatch>();
   let compId = useParams();
   const navigate = useNavigate();
 
-  const { adminManageComponentsGetview } = useSelector(
-    (state: any) => state?.adminManageComponentsGetview
-  );
+  // const { adminManageComponentsGetview } = useSelector(
+  //   (state: any) => state?.adminManageComponentsGetview
+  // );
 
-  const { adminTagList } = useSelector((state: any) => state?.adminTagList);
+  // const { adminTagList } = useSelector((state: any) => state?.adminTagList);
+  // manageComponentStore.fetchAdminTagList();
 
   const [formData, setFormData] = useState<any>({});
   const [compData, setCompData] = useState<any>([]);
   const [compImg, setCompImg] = useState(
-    adminManageComponentsGetview?.payload?.image_url
+    // adminManageComponentsGetview?.payload?.image_url
+    manageComponentStore.adminEditManageComponent?.image_url
   );
   const [techImg, setTechImg] = useState(
-    adminManageComponentsGetview?.payload?.techstack?.avatar_url
+    // adminManageComponentsGetview?.payload?.techstack?.avatar_url
+    manageComponentStore.adminEditManageComponent?.techstack?.avatar_url
   );
 
   // permission updateMetaDetail
@@ -62,8 +76,6 @@ function Edit_Manage_Components() {
     reader.readAsDataURL(e.target.files[0]);
   };
 
-
-  
   const imageHandler2 = (e: any) => {
     const reader = new FileReader();
     setFormData({
@@ -81,14 +93,20 @@ function Edit_Manage_Components() {
   const handleCompStatus = async (flag: boolean) => {
     let Obj = {} as Object;
     Obj = {
-      id: adminManageComponentsGetview?.payload?.id,
+      // id: adminManageComponentsGetview?.payload?.id,
+      id: manageComponentStore.adminEditManageComponent?.id,
       publishFlag: flag,
     };
-    const componentStatusCode: any = await dispatch(
-      componentStatus(Obj, formData)
-    );
+    // const componentStatusCode: any = await dispatch(
+    //   componentStatus(Obj, formData)
+    // );
+    const componentStatusCode: any =
+      await manageComponentStore.fetchAdminEditPublishComponent(Obj, formData);
+    console.log("status", componentStatusCode?.status);
 
     if (componentStatusCode?.status === 200) {
+      console.log("true");
+
       toast.success(flag === true ? "Data Published" : "Data Unpublished");
     }
     setTimeout(() => {
@@ -98,12 +116,17 @@ function Edit_Manage_Components() {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const postStatusCode: any = await dispatch(
-      adminManageCompsaveDataPost(
-        adminManageComponentsGetview?.payload?.id,
+    // const postStatusCode: any = await dispatch(
+    //   adminManageCompsaveDataPost(
+    //     adminManageComponentsGetview?.payload?.id,
+    //     formData
+    //   )
+    // );
+    const postStatusCode: any =
+      await manageComponentStore.fetchAdminEditSaveComponent(
+        manageComponentStore.adminEditManageComponent?.id,
         formData
-      )
-    );
+      );
     if (postStatusCode?.status === 200) {
       toast.success("Data Updated Successfully");
     }
@@ -113,27 +136,47 @@ function Edit_Manage_Components() {
   };
 
   useEffect(() => {
-    setCompImg(adminManageComponentsGetview?.payload?.image_url);
-    setTechImg(adminManageComponentsGetview?.payload?.techstack?.avatar_url);
+    // setCompImg(adminManageComponentsGetview?.payload?.image_url);
+    setCompImg(manageComponentStore.adminEditManageComponent?.image_url);
+    // setTechImg(adminManageComponentsGetview?.payload?.techstack?.avatar_url);
+    setTechImg(
+      manageComponentStore.adminEditManageComponent?.techstack?.avatar_url
+    );
+    manageComponentStore.fetchAdminTagList();
+
     setFormData({
       ...formData,
       componentImg: null,
       techstackImg: null,
-      display_name: adminManageComponentsGetview?.payload?.display_name,
-      features: adminManageComponentsGetview?.payload?.features,
-      functions: adminManageComponentsGetview?.payload?.functional_use,
-      tags: adminManageComponentsGetview?.payload?.component_tags?.map(
-        (tag: AllTags) => tag.name
+      // display_name: adminManageComponentsGetview?.payload?.display_name,
+      // features: adminManageComponentsGetview?.payload?.features,
+      // functions: adminManageComponentsGetview?.payload?.functional_use,
+      // tags: adminManageComponentsGetview?.payload?.component_tags?.map(
+      //   (tag: AllTags) => tag.name
+      // ),
+      // functional_tags:
+      //   adminManageComponentsGetview?.payload?.functional_tags?.map(
+      //     (tag: AllTags) => tag.name
+      //   ),
+      // feature_tags: adminManageComponentsGetview?.payload?.feature_tags?.map(
+      //   (tag: AllTags) => tag.name
+      // ),
+      display_name: manageComponentStore.adminEditManageComponent?.display_name,
+      features: manageComponentStore.adminEditManageComponent?.features,
+      functions: manageComponentStore.adminEditManageComponent?.functional_use,
+      tags: manageComponentStore.adminEditManageComponent?.component_tags?.map(
+        (tag: any) => tag.name
       ),
       functional_tags:
-        adminManageComponentsGetview?.payload?.functional_tags?.map(
-          (tag: AllTags) => tag.name
+        manageComponentStore.adminEditManageComponent?.functional_tags?.map(
+          (tag: any) => tag.name
         ),
-      feature_tags: adminManageComponentsGetview?.payload?.feature_tags?.map(
-        (tag: AllTags) => tag.name
-      ),
+      feature_tags:
+        manageComponentStore.adminEditManageComponent?.feature_tags?.map(
+          (tag: any) => tag.name
+        ),
     });
-  }, [adminManageComponentsGetview?.payload?.id]);
+  }, [manageComponentStore.adminEditManageComponent?.id]);
 
   useEffect(() => {
     document.body.className = "app d-flex flex-column h-100  nav-light";
@@ -142,11 +185,15 @@ function Edit_Manage_Components() {
   }, []);
 
   const DataFun = async () => {
-    var comp: any = await dispatch(
-      adminManageComponentsGetViewRequest(compId?.id)
+    // var comp: any = await dispatch(
+    //   adminManageComponentsGetViewRequest(compId?.id)
+    // );
+    var comp: any = await manageComponentStore.fetchAdminEditManageComponent(
+      compId?.id
     );
     setCompData(comp);
-    var tagList = await dispatch(adminTagListGet());
+    // var tagList = await dispatch(adminTagListGet());
+    var tagList = await manageComponentStore.fetchAdminTagList();
   };
 
   return (
@@ -177,8 +224,8 @@ function Edit_Manage_Components() {
                         </Link>
 
                         {allowPublishPermission.length !== 0 ? (
-                          adminManageComponentsGetview?.payload?.status ==
-                          "publish" ? (
+                          manageComponentStore.adminEditManageComponent
+                            ?.status == "publish" ? (
                             <Link
                               to=""
                               onClick={() => handleCompStatus(false)}
@@ -186,8 +233,8 @@ function Edit_Manage_Components() {
                             >
                               Unpublish
                             </Link>
-                          ) : adminManageComponentsGetview?.payload?.status ==
-                            "draft" ? (
+                          ) : manageComponentStore.adminEditManageComponent
+                              ?.status == "draft" ? (
                             <Link
                               to=""
                               onClick={() => handleCompStatus(true)}
@@ -222,13 +269,19 @@ function Edit_Manage_Components() {
                             <div className="form-group">
                               <label className="control-label">ID</label>
                               <div className="control-text">
-                                {adminManageComponentsGetview?.payload?.id}
+                                {
+                                  manageComponentStore.adminEditManageComponent
+                                    ?.id
+                                }
                               </div>
                             </div>
                             <div className="form-group">
                               <label className="control-label">Title</label>
                               <div className="control-text">
-                                {adminManageComponentsGetview?.payload?.title}
+                                {
+                                  manageComponentStore.adminEditManageComponent
+                                    ?.title
+                                }
                               </div>
                             </div>
                           </div>
@@ -268,7 +321,10 @@ function Edit_Manage_Components() {
                                   display_name: e.target.value,
                                 })
                               }
-                              defaultValue={compData?.payload?.display_name}
+                              defaultValue={
+                                manageComponentStore.adminEditManageComponent
+                                  ?.display_name
+                              }
                             />
                           </div>
                           <div className="form-group">
@@ -283,56 +339,62 @@ function Edit_Manage_Components() {
                                   description: e.target.value,
                                 })
                               }
-                              defaultValue={compData?.payload?.description}
+                              defaultValue={
+                                manageComponentStore.adminEditManageComponent
+                                  ?.description
+                              }
                             ></textarea>
                           </div>
                           <div className="form-group">
                             <label className="control-label">
                               Feature Tags
                             </label>
-                            {adminTagList && compData && (
-                              <Autocomplete
-                                multiple
-                                id="tags-filled"
-                                options={adminTagList?.payload?.feature_tags?.map(
-                                  (item: AdminTagList) => {
-                                    return item.name;
+                            {manageComponentStore.adminTagList &&
+                              manageComponentStore.adminEditManageComponent && (
+                                <Autocomplete
+                                  multiple
+                                  id="tags-filled"
+                                  options={manageComponentStore.adminTagList?.feature_tags?.map(
+                                    (item: any) => {
+                                      return item.name;
+                                    }
+                                  )}
+                                  onChange={(event, value: any) =>
+                                    setFormData({
+                                      ...formData,
+                                      feature_tags: value,
+                                    })
                                   }
-                                )}
-                                onChange={(event, value: any) =>
-                                  setFormData({
-                                    ...formData,
-                                    feature_tags: value,
-                                  })
-                                }
-                                defaultValue={compData?.payload?.feature_tags?.map(
-                                  (item: AllTags) => {
-                                    return item.name;
+                                  defaultValue={manageComponentStore.adminEditManageComponent.feature_tags?.map(
+                                    (item: any) => {
+                                      return item.name;
+                                    }
+                                  )}
+                                  freeSolo
+                                  renderTags={(
+                                    value: readonly string[],
+                                    getTagProps: any
+                                  ) =>
+                                    value.map(
+                                      (option: string, index: number) => (
+                                        <Chip
+                                          variant="outlined"
+                                          label={option}
+                                          {...getTagProps({ index })}
+                                        />
+                                      )
+                                    )
                                   }
-                                )}
-                                freeSolo
-                                renderTags={(
-                                  value: readonly string[],
-                                  getTagProps: any
-                                ) =>
-                                  value.map((option: string, index: number) => (
-                                    <Chip
-                                      variant="outlined"
-                                      label={option}
-                                      {...getTagProps({ index })}
+                                  renderInput={(params: any) => (
+                                    <TextField
+                                      {...params}
+                                      variant="filled"
+                                      label="Select Tags"
+                                      placeholder="Tags"
                                     />
-                                  ))
-                                }
-                                renderInput={(params: any) => (
-                                  <TextField
-                                    {...params}
-                                    variant="filled"
-                                    label="Select Tags"
-                                    placeholder="Tags"
-                                  />
-                                )}
-                              />
-                            )}
+                                  )}
+                                />
+                              )}
                           </div>
                           <div className="form-group">
                             <label className="control-label">Feature</label>
@@ -346,7 +408,10 @@ function Edit_Manage_Components() {
                                   features: e.target.value,
                                 })
                               }
-                              defaultValue={compData?.payload?.features}
+                              defaultValue={
+                                manageComponentStore.adminEditManageComponent
+                                  ?.features
+                              }
                             ></textarea>
                           </div>
                         </div>
@@ -360,7 +425,10 @@ function Edit_Manage_Components() {
                                   Tech Stack
                                 </label>
                                 <div className="control-text">
-                                  {compData?.payload?.techstack?.name}
+                                  {
+                                    manageComponentStore
+                                      .adminEditManageComponent?.techstack?.name
+                                  }
                                 </div>
                               </div>
                             </div>
@@ -398,7 +466,7 @@ function Edit_Manage_Components() {
                               </label>
                               <div className="control-text">
                                 {
-                                  adminManageComponentsGetview?.payload
+                                  manageComponentStore.adminEditManageComponent
                                     ?.gitlab_url
                                 }
                               </div>
@@ -407,152 +475,155 @@ function Edit_Manage_Components() {
                               <label className="control-label">
                                 Component Tags
                               </label>
-                              {adminTagList && compData && (
-                                <Autocomplete
-                                  multiple
-                                  id="tags-filled"
-                                  options={adminTagList?.payload?.tags?.map(
-                                    (item: AdminTagList) => {
-                                      return item.name;
+                              {manageComponentStore.adminTagList &&
+                                manageComponentStore.adminEditManageComponent && (
+                                  <Autocomplete
+                                    multiple
+                                    id="tags-filled"
+                                    options={manageComponentStore.adminTagList?.tags?.map(
+                                      (item: any) => {
+                                        return item.name;
+                                      }
+                                    )}
+                                    onChange={(event, value: any) =>
+                                      setFormData({
+                                        ...formData,
+                                        tags: value,
+                                      })
                                     }
-                                  )}
-                                  onChange={(event, value: any) =>
-                                    setFormData({
-                                      ...formData,
-                                      tags: value,
-                                    })
-                                  }
-                                  defaultValue={compData?.payload?.component_tags?.map(
-                                    (item: AllTags) => {
-                                      return item.name;
-                                    }
-                                  )}
-                                  freeSolo
-                                  renderTags={(
-                                    value: readonly string[],
-                                    getTagProps: any
-                                  ) =>
-                                    value.map(
-                                      (option: string, index: number) => (
-                                        <Chip
-                                          variant="outlined"
-                                          label={option}
-                                          {...getTagProps({ index })}
-                                        />
+                                    defaultValue={manageComponentStore.adminEditManageComponent?.component_tags?.map(
+                                      (item: any) => {
+                                        return item.name;
+                                      }
+                                    )}
+                                    freeSolo
+                                    renderTags={(
+                                      value: readonly string[],
+                                      getTagProps: any
+                                    ) =>
+                                      value.map(
+                                        (option: string, index: number) => (
+                                          <Chip
+                                            variant="outlined"
+                                            label={option}
+                                            {...getTagProps({ index })}
+                                          />
+                                        )
                                       )
-                                    )
-                                  }
-                                  renderInput={(params: any) => (
-                                    <TextField
-                                      {...params}
-                                      variant="filled"
-                                      label="Select Tags"
-                                      placeholder="Tags"
-                                    />
-                                  )}
-                                />
-                              )}
+                                    }
+                                    renderInput={(params: any) => (
+                                      <TextField
+                                        {...params}
+                                        variant="filled"
+                                        label="Select Tags"
+                                        placeholder="Tags"
+                                      />
+                                    )}
+                                  />
+                                )}
                             </div>
                             <div className="form-group">
                               <label className="control-label">
                                 Functional Tags
                               </label>
-                              {adminTagList && compData && (
-                                <Autocomplete
-                                  multiple
-                                  id="tags-filled"
-                                  options={adminTagList?.payload?.functionalTags?.map(
-                                    (item: AdminTagList) => {
-                                      return item.name;
+                              {manageComponentStore.adminTagList &&
+                                manageComponentStore.adminEditManageComponent && (
+                                  <Autocomplete
+                                    multiple
+                                    id="tags-filled"
+                                    options={manageComponentStore.adminTagList?.functionalTags?.map(
+                                      (item: any) => {
+                                        return item.name;
+                                      }
+                                    )}
+                                    onChange={(event, value: any) =>
+                                      setFormData({
+                                        ...formData,
+                                        functional_tags: value,
+                                      })
                                     }
-                                  )}
-                                  onChange={(event, value: any) =>
-                                    setFormData({
-                                      ...formData,
-                                      functional_tags: value,
-                                    })
-                                  }
-                                  defaultValue={compData?.payload?.functional_tags?.map(
-                                    (item: AllTags) => {
-                                      return item.name;
-                                    }
-                                  )}
-                                  freeSolo
-                                  renderTags={(
-                                    value: readonly string[],
-                                    getTagProps: any
-                                  ) =>
-                                    value.map(
-                                      (option: string, index: number) => (
-                                        <Chip
-                                          variant="outlined"
-                                          label={option}
-                                          {...getTagProps({ index })}
-                                        />
+                                    defaultValue={manageComponentStore.adminEditManageComponent?.functional_tags?.map(
+                                      (item: any) => {
+                                        return item.name;
+                                      }
+                                    )}
+                                    freeSolo
+                                    renderTags={(
+                                      value: readonly string[],
+                                      getTagProps: any
+                                    ) =>
+                                      value.map(
+                                        (option: string, index: number) => (
+                                          <Chip
+                                            variant="outlined"
+                                            label={option}
+                                            {...getTagProps({ index })}
+                                          />
+                                        )
                                       )
-                                    )
-                                  }
-                                  renderInput={(params: any) => (
-                                    <TextField
-                                      {...params}
-                                      variant="filled"
-                                      label="Select Tags"
-                                      placeholder="Tags"
-                                    />
-                                  )}
-                                />
-                              )}
+                                    }
+                                    renderInput={(params: any) => (
+                                      <TextField
+                                        {...params}
+                                        variant="filled"
+                                        label="Select Tags"
+                                        placeholder="Tags"
+                                      />
+                                    )}
+                                  />
+                                )}
                             </div>
                             <div className="form-group">
                               <label className="control-label">
                                 Frameworks
                               </label>
 
-                              {adminTagList && compData && (
-                                <Autocomplete
-                                  multiple
-                                  id="tags-filled"
-                                  options={adminTagList?.payload?.frameworks?.map(
-                                    (item: AdminTagList) => {
-                                      return item?.name;
+                              {manageComponentStore.adminTagList &&
+                                manageComponentStore.adminEditManageComponent && (
+                                  <Autocomplete
+                                    multiple
+                                    id="tags-filled"
+                                    options={manageComponentStore.adminTagList?.frameworks?.map(
+                                      (item: any) => {
+                                        return item?.name;
+                                      }
+                                    )}
+                                    onChange={(event, value: any) =>
+                                      setFormData({
+                                        ...formData,
+                                        frameworks: value,
+                                      })
                                     }
-                                  )}
-                                  onChange={(event, value: any) =>
-                                    setFormData({
-                                      ...formData,
-                                      frameworks: value,
-                                    })
-                                  }
-                                  defaultValue={compData?.payload?.framework_tags?.map(
-                                    (item: AllTags) => {
-                                      return item?.name;
-                                    }
-                                  )}
-                                  freeSolo
-                                  renderTags={(
-                                    value: readonly string[],
-                                    getTagProps: any
-                                  ) =>
-                                    value.map(
-                                      (option: string, index: number) => (
-                                        <Chip
-                                          variant="outlined"
-                                          label={option}
-                                          {...getTagProps({ index })}
-                                        />
+                                    defaultValue={manageComponentStore.adminEditManageComponent?.framework_tags?.map(
+                                      (item: any) => {
+                                        return item?.name;
+                                      }
+                                    )}
+                                    freeSolo
+                                    renderTags={(
+                                      value: readonly string[],
+                                      getTagProps: any
+                                    ) =>
+                                      value.map(
+                                        (option: string, index: number) => (
+                                          <Chip
+                                            variant="outlined"
+                                            label={option}
+                                            {...getTagProps({ index })}
+                                          />
+                                        )
                                       )
-                                    )
-                                  }
-                                  renderInput={(params: any) => (
-                                    <TextField
-                                      {...params}
-                                      variant="filled"
-                                      label="Select Tags"
-                                      placeholder="Tags"
-                                    />
-                                  )}
-                                />
-                              )}
+                                    }
+                                    renderInput={(params: any) => (
+                                      <TextField
+                                        {...params}
+                                        variant="filled"
+                                        label="Select Tags"
+                                        placeholder="Tags"
+                                      />
+                                    )}
+                                  />
+                                )}
                             </div>
                             <div className="form-group">
                               <label className="control-label">
@@ -568,7 +639,10 @@ function Edit_Manage_Components() {
                                     functions: e.target.value,
                                   })
                                 }
-                                defaultValue={compData?.payload?.functional_use}
+                                defaultValue={
+                                  manageComponentStore.adminEditManageComponent
+                                    ?.functional_use
+                                }
                               ></textarea>
                             </div>
                           </div>
@@ -577,14 +651,18 @@ function Edit_Manage_Components() {
                           <div className="form-group">
                             <label className="control-label">Version</label>
                             <div className="control-text">
-                              {adminManageComponentsGetview?.payload?.version}
+                              {
+                                manageComponentStore.adminEditManageComponent
+                                  ?.version
+                              }
                             </div>
                           </div>
                           <div className="form-group">
                             <label className="control-label">Created On</label>
                             <div className="control-text">
                               {moment(
-                                adminManageComponentsGetview?.payload?.createdAt
+                                manageComponentStore.adminEditManageComponent
+                                  ?.createdAt
                               )
                                 .utc()
                                 .format("MMM DD,YYYY")}
@@ -596,7 +674,7 @@ function Edit_Manage_Components() {
                             </label>
                             <div className="control-text">
                               {
-                                adminManageComponentsGetview?.payload
+                                manageComponentStore.adminEditManageComponent
                                   ?.updated_by
                               }
                             </div>
@@ -606,12 +684,12 @@ function Edit_Manage_Components() {
                               Last Updated On
                             </label>
                             <div className="control-text">
-                              {adminManageComponentsGetview?.payload
+                              {manageComponentStore.adminEditManageComponent
                                 ?.updatedAt === null
                                 ? "---"
                                 : moment(
-                                    adminManageComponentsGetview?.payload
-                                      ?.updatedAt
+                                    manageComponentStore
+                                      .adminEditManageComponent?.updatedAt
                                   )
                                     .utc()
                                     .format("MMM DD,YYYY")}
@@ -622,12 +700,12 @@ function Edit_Manage_Components() {
                               Last Draft On
                             </label>
                             <div className="control-text">
-                              {adminManageComponentsGetview?.payload
+                              {manageComponentStore.adminEditManageComponent
                                 ?.draftAt === null
                                 ? "---"
                                 : moment(
-                                    adminManageComponentsGetview?.payload
-                                      ?.draftAt
+                                    manageComponentStore
+                                      .adminEditManageComponent?.draftAt
                                   )
                                     .utc()
                                     .format("MMM DD,YYYY")}
@@ -638,12 +716,12 @@ function Edit_Manage_Components() {
                               Last Published On
                             </label>
                             <div className="control-text">
-                              {adminManageComponentsGetview?.payload
+                              {manageComponentStore.adminEditManageComponent
                                 ?.publishedAt === null
                                 ? "---"
                                 : moment(
-                                    adminManageComponentsGetview?.payload
-                                      ?.publishedAt
+                                    manageComponentStore
+                                      .adminEditManageComponent?.publishedAt
                                   )
                                     .utc()
                                     .format("MMM DD,YYYY")}
@@ -666,4 +744,4 @@ function Edit_Manage_Components() {
   );
 }
 
-export default Edit_Manage_Components;
+export default observer(Edit_Manage_Components);
