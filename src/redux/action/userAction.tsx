@@ -304,8 +304,6 @@ export const fetchUserProfile = (email: any) => async (dispatch: any) => {
       dispatch({ type: FETCHUSER_PROFILEREQUEST });
       const getData = await postFunction(`api/fetchuser`, email);
       dispatch({ type: FETCHUSER_PROFILESUCCESS, payload: getData });
-      console.log(getData);
-
       return resolve(getData);
     } catch (error) {
       console.error(error);

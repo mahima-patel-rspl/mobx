@@ -2,6 +2,7 @@ interface TopCategoriesData {
   avatar_url: string;
   total_components: number;
   name: string;
+  id: number;
 }
 
 interface FavouritesData {
