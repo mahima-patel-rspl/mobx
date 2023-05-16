@@ -25,19 +25,26 @@ import {
   ManageComponents,
   Techstacks,
 } from "./InterfaceTypes";
+import { useStore } from "../../hooks/useStore";
+import { observer } from "mobx-react-lite";
 function Manage_Components() {
+  const {
+    rootStore: { manageComponentStore },
+  } = useStore();
+
   const dispatch = useDispatch<AppDispatch>();
 
-  const { adminManageComponentsPost } = useSelector(
-    (state: any) => state?.adminManageComponentsPost
-  );
-  const { adminTagList } = useSelector((state: any) => state?.adminTagList);
+  // const { adminManageComponentsPost } = useSelector(
+  //   (state: any) => state?.adminManageComponentsPost
+  // );
 
-  const { adminFilterFieldsData } = useSelector(
-    (state: any) => state?.adminFilterFieldsData
-  );
+  // const { adminTagList } = useSelector((state: any) => state?.adminTagList);
 
-  const { techStacks } = useSelector((state: any) => state?.techStacks);
+  // const { adminFilterFieldsData } = useSelector(
+  //   (state: any) => state?.adminFilterFieldsData
+  // );
+
+  // const { techStacks } = useSelector((state: any) => state?.techStacks);
 
   const [searchWord, setSearchWord] = useState("");
 
@@ -79,14 +86,15 @@ function Manage_Components() {
     createdByArr.push(item?.name);
   });
 
-  const totalEntry = adminManageComponentsPost?.payload?.length;
+  // const totalEntry = adminManageComponentsPost?.payload?.length;
+  const totalEntry = manageComponentStore?.manageComponentList?.length;
 
   const imgArr = ["All", "Available", "Not Available"];
   const statusArr = ["draft", "publish"];
 
   //search bar - data search
-  const searchFilterData = adminManageComponentsPost?.payload?.filter(
-    (item: ManageComponents) => {
+  const searchFilterData = manageComponentStore?.manageComponentList?.filter(
+    (item: any) => {
       if (searchWord == "") {
         return item;
       } else if (
@@ -185,23 +193,39 @@ function Manage_Components() {
     setFTechstackImage(null);
     setFComponentImage(null);
     setFStatus(null);
-    dispatch(adminTagListGet());
-    dispatch(adminfilterfieldsData());
-    dispatch(techStackList());
-    dispatch(
-      adminManageComponentsPostRequest({
-        from: null,
-        to: null,
-        tags: null,
-        techstackImage: null,
-        techstack: null,
-        componentImage: null,
-        version: null,
-        status: null,
-        createdBy: null,
-        search: null,
-      })
-    );
+    // dispatch(adminTagListGet());
+    // dispatch(adminfilterfieldsData());
+    manageComponentStore.fetchManageFilteredData();
+    // dispatch(techStackList());
+    manageComponentStore.fetchTechstacks();
+
+    // dispatch(
+    //   adminManageComponentsPostRequest({
+    //     from: null,
+    //     to: null,
+    //     tags: null,
+    //     techstackImage: null,
+    //     techstack: null,
+    //     componentImage: null,
+    //     version: null,
+    //     status: null,
+    //     createdBy: null,
+    //     search: null,
+    //   })
+    // );
+
+    manageComponentStore.fetchManageComponents({
+      from: null,
+      to: null,
+      tags: null,
+      techstackImage: null,
+      techstack: null,
+      componentImage: null,
+      version: null,
+      status: null,
+      createdBy: null,
+      search: null,
+    });
   };
 
   const fieldData = {
@@ -218,26 +242,35 @@ function Manage_Components() {
   };
 
   const handleApply = () => {
-    dispatch(adminManageComponentsPostRequest(fieldData));
+    // dispatch(adminManageComponentsPostRequest(fieldData));
+    manageComponentStore.fetchManageComponents(fieldData);
   };
 
   useEffect(() => {
     document.body.className = "app d-flex flex-column h-100  nav-light";
+    manageComponentStore.fetchManageComponents(fieldData);
+    manageComponentStore.fetchAdminTagList();
+    manageComponentStore.fetchTechstacks();
+    manageComponentStore.fetchManageFilteredData();
+  }, []);
 
-    dispatch(adminManageComponentsPostRequest(fieldData));
-    dispatch(adminTagListGet());
-    dispatch(adminfilterfieldsData());
-    dispatch(techStackList());
+  useEffect(() => {
+    document.body.className = "app d-flex flex-column h-100  nav-light";
+
+    // dispatch(adminManageComponentsPostRequest(fieldData));
+    // dispatch(adminTagListGet());
+    // dispatch(adminfilterfieldsData());
+    // dispatch(techStackList());
   }, [dispatch]);
 
   // import Git data
   const handleImport = async () => {
-    const techstackData: any = await dispatch(adminSyncTechstack());
-    if (techstackData?.status) {
-      const componentsData: any = await dispatch(adminSyncComponents());
-      if (componentsData?.status) {
-        const filesData: any = await dispatch(adminSyncFiles());
-        if (filesData?.status) {
+    await manageComponentStore.fetchAdminSyncTechstack();
+    if (manageComponentStore?.adminSyncTechstack?.status) {
+      await manageComponentStore.fetchAdminSyncComponents();
+      if (manageComponentStore?.adminSyncComponents?.status) {
+        await manageComponentStore.fetchAdminSyncFiles();
+        if (manageComponentStore?.adminSyncFiles?.status) {
           toast.success("Data Imported Successfully");
         }
       }
@@ -285,7 +318,7 @@ function Manage_Components() {
                     </div>
                     <div className="form-group-btn d-flex align-items-center justify-content-center ">
                       <button
-                        className="btn  btn-primary"
+                        className="btn btn-primary"
                         onClick={handleImport}
                       >
                         Import
@@ -315,9 +348,10 @@ function Manage_Components() {
                           <th>Action</th>
                         </tr>
                       </thead>
-                      {adminManageComponentsPost?.payload?.length !== 0 ? (
+                      {manageComponentStore?.manageComponentList?.length !==
+                      0 ? (
                         <tbody>
-                          {searchData?.map((data: ManageComponents) => {
+                          {searchData?.map((data: any) => {
                             return (
                               <tr>
                                 <td>{data?.id}</td>
@@ -395,7 +429,7 @@ function Manage_Components() {
                   </div>
                 </div>
 
-                {adminManageComponentsPost?.payload?.length !== 0 ? (
+                {manageComponentStore?.manageComponentList?.length !== 0 ? (
                   <div className="tilewp-footer ">
                     <div className="tile-footer-lt">
                       <p>
@@ -493,9 +527,11 @@ function Manage_Components() {
                       Tech Stack <span className="text-danger">*</span>
                     </label>
                     <Multiselect
-                      options={techStacks?.payload?.map((item: Techstacks) => {
-                        return item;
-                      })}
+                      options={manageComponentStore?.techStacks?.map(
+                        (item: any) => {
+                          return item;
+                        }
+                      )}
                       displayValue="name"
                       selectedValues={fTechStack}
                       onSelect={setFTechStack}
@@ -505,8 +541,8 @@ function Manage_Components() {
                   <div className="form-group">
                     <label className="control-label">Frameworks</label>
                     <Multiselect
-                      options={adminTagList?.payload?.frameworks?.map(
-                        (item: AdminTagList) => {
+                      options={manageComponentStore?.adminTagList?.frameworks?.map(
+                        (item: any) => {
                           return item;
                         }
                       )}
@@ -520,8 +556,8 @@ function Manage_Components() {
                   <div className="form-group">
                     <label className="control-label">Version</label>
                     <Multiselect
-                      options={adminFilterFieldsData?.payload?.version?.map(
-                        (item: string) => {
+                      options={manageComponentStore?.manageFilteredList?.version?.map(
+                        (item: any) => {
                           return item;
                         }
                       )}
@@ -535,8 +571,8 @@ function Manage_Components() {
                   <div className="form-group">
                     <label className="control-label">Tags</label>
                     <Multiselect
-                      options={adminTagList?.payload?.tags?.map(
-                        (item: AdminTagList) => {
+                      options={manageComponentStore?.adminTagList?.tags?.map(
+                        (item: any) => {
                           return item;
                         }
                       )}
@@ -551,8 +587,8 @@ function Manage_Components() {
                   <div className="form-group">
                     <label className="control-label">Created By</label>
                     <Multiselect
-                      options={adminFilterFieldsData?.payload?.author?.map(
-                        (item: AllTags) => {
+                      options={manageComponentStore?.manageFilteredList?.author?.map(
+                        (item: any) => {
                           return item;
                         }
                       )}
@@ -653,4 +689,4 @@ function Manage_Components() {
   );
 }
 
-export default Manage_Components;
+export default observer(Manage_Components);

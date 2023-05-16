@@ -33,8 +33,13 @@ import {
   Top3LeadersData,
   Mycontributions,
 } from "./InterfaceTypes";
+import { useStore } from "../../hooks/useStore";
+import { observer } from "mobx-react-lite";
 
 function Dashboard(): JSX.Element {
+  const {
+    rootStore: { userStore, dashboardStore },
+  } = useStore();
   const ls = new SecureLS();
   const dispatch = useDispatch<AppDispatch>();
   const bg = [
@@ -54,17 +59,17 @@ function Dashboard(): JSX.Element {
   const location = useLocation();
   useEffect(() => {
     document.body.className = "app nav-light d-flex flex-column h-100";
-    dispatch(topcategories(10));
-    dispatch(RecentlyAdded());
-    dispatch(totalViewsFun());
-    dispatch(totalDownload());
-    dispatch(totalComponents());
-    dispatch(fetchUserProfile(data));
-    dispatch(mostViewed("week"));
-    dispatch(myContribution());
-    dispatch(pendingItems());
-    dispatch(favouritesList());
-    dispatch(leaderboards(leaderBoardoptions));
+    userStore.fetchUser(data);
+    dashboardStore.fetchCategories(10);
+    dashboardStore.fetchAddedItems();
+    dashboardStore.fetchViews();
+    dashboardStore.fetchDownloads();
+    dashboardStore.fetchComponents();
+    dashboardStore.fetchMostViewedData("week");
+    dashboardStore.fetchContributions();
+    dashboardStore.fetchPendingItems();
+    dashboardStore.fetchFavourites();
+    dashboardStore.fetchLeaders(leaderBoardoptions);
   }, []);
   //debugger;
   useEffect(() => {
@@ -73,42 +78,24 @@ function Dashboard(): JSX.Element {
 
   const [techStackId] = useState<Array<string>>([]);
   const [dataId, setDataId] = useState<object>([]);
-  const { categories } = useSelector((state: any) => state?.topcategories);
-  const { Recentlydata } = useSelector((state: any) => state?.RecentlyAdded);
-  const { totalViews } = useSelector((state: any) => state?.totalViews);
-  const { totalDownloads } = useSelector((state: any) => state?.totalDownload);
-  const { totalComponent } = useSelector(
-    (state: any) => state?.totalComponents
-  );
 
-  const { fetchUserProfileData } = useSelector(
-    (state: any) => state?.fetchUserProfile
-  );
-  const { mostViewedData } = useSelector((state: any) => state?.mostViewed);
   const tokenString: string = getToken();
 
   var decoded: any = jwt_decode(tokenString);
 
   const data = { search: decoded?.email };
-  const fullName = fetchUserProfileData?.payload?.[0]?.name;
+  const fullName: any = userStore?.user[0]?.name;
 
-  const { leaderboardData } = useSelector(
-    (state: any) => state?.leaderboardData
-  );
-  const { favouritesData } = useSelector((state: any) => state?.favouritesData);
-  const { pendingItemsdata } = useSelector(
-    (state: any) => state?.pendingItemsdata
-  );
-  const { userContribution } = useSelector(
-    (state: any) => state?.userContribution
-  );
+  const favouritesData = dashboardStore.favourites;
+  const pendingItemsdata = dashboardStore.pendingItems;
+  const userContribution = dashboardStore.contributions;
 
   const [leaderBoardoptions, setLeaderBoardoptions] = useState("today");
 
   // load More Data
   const datanumber = 4;
   const [noOfComponent, setNoOfComponent] = useState(datanumber);
-  const SearchData = categories?.payload?.slice(0, noOfComponent);
+  const SearchData = dashboardStore.categories?.slice(0, noOfComponent);
   const loadMore = () => {
     setNoOfComponent(noOfComponent + datanumber);
   };
@@ -121,10 +108,11 @@ function Dashboard(): JSX.Element {
       await btn?.click();
     }
   };
-  const top3LeadersData = leaderboardData?.payload?.slice(0, 3);
-  const remainingLeadersData = leaderboardData?.payload?.slice(
+  // const top3LeadersData = leaderboardData?.payload?.slice(0, 3);
+  const top3LeadersData = dashboardStore?.leaders?.slice(0, 3);
+  const remainingLeadersData = dashboardStore?.leaders?.slice(
     3,
-    leaderboardData?.payload?.length
+    dashboardStore?.leaders?.length
   );
 
   //Load more myContribution
@@ -137,12 +125,12 @@ function Dashboard(): JSX.Element {
   const [disableContributionNextButton, setDisableContributionNextButton] =
     useState(false);
 
-  const SearchContributionData = userContribution?.payload?.slice(
+  const SearchContributionData = userContribution?.slice(
     noOfContribution - ContributionDataNumber,
     noOfContribution
   );
   const loadMoreIncContribution = () => {
-    if (noOfContribution >= userContribution?.payload?.length) {
+    if (noOfContribution >= userContribution?.length) {
       setDisableContributionNextButton(true);
     } else {
       setNoOfContribution(noOfContribution + ContributionDataNumber);
@@ -161,17 +149,14 @@ function Dashboard(): JSX.Element {
       setDisableContributionPrevButton(false);
     }
 
-    if (noOfContribution >= userContribution?.payload?.length) {
+    if (noOfContribution >= userContribution?.length) {
       setDisableContributionNextButton(false);
     }
   };
   //Load more Favourites
   const FavouritesDataNumber = 3;
   const [noOfFavourites, setNoOfFavourites] = useState(FavouritesDataNumber);
-  const SearchFavouritesData = favouritesData?.payload?.slice(
-    0,
-    noOfFavourites
-  );
+  const SearchFavouritesData = favouritesData?.slice(0, noOfFavourites);
 
   const loadMoreIncFavourites = () => {
     setNoOfFavourites(noOfFavourites + FavouritesDataNumber);
@@ -183,10 +168,7 @@ function Dashboard(): JSX.Element {
   //Load more  pendingItem
   const pendingItemDataNumber = 3;
   const [noOfpendingItem, setNoOfpendingItem] = useState(pendingItemDataNumber);
-  const SearchpendingItemData = pendingItemsdata?.payload?.slice(
-    0,
-    noOfpendingItem
-  );
+  const SearchpendingItemData = pendingItemsdata?.slice(0, noOfpendingItem);
 
   const loadMoreIncpendingItem = () => {
     setNoOfpendingItem(noOfpendingItem + pendingItemDataNumber);
@@ -218,12 +200,14 @@ function Dashboard(): JSX.Element {
   };
 
   useEffect(() => {
-    dispatch(leaderboards(leaderBoardoptions));
+    // dispatch(leaderboards(leaderBoardoptions));
+    dashboardStore.fetchLeaders(leaderBoardoptions);
   }, [leaderBoardoptions]);
 
   // mostViewed selectDuration
   const selectDuration = async (e: { target: { value: string } }) => {
-    await dispatch(mostViewed(e?.target?.value));
+    // await dispatch(mostViewed(e?.target?.value));/
+    dashboardStore.fetchMostViewedData(e?.target?.value);
   };
 
   return (
@@ -291,8 +275,8 @@ function Dashboard(): JSX.Element {
                   </div>
                   <div className="categories_list">
                     <ul>
-                      {categories?.payload?.map(
-                        (item: TopCategoriesData, index: number) => {
+                      {dashboardStore.categories?.map(
+                        (item: any, index: number) => {
                           return (
                             <Fragment>
                               <li>
@@ -341,7 +325,7 @@ function Dashboard(): JSX.Element {
                     </div>
                   </div>
                   <div className="grid_wrapper grid-2">
-                    {mostViewedData?.payload?.map((data: MostViewedData) => {
+                    {dashboardStore.mostViewedData?.map((data: any) => {
                       return (
                         <Fragment>
                           <div className="blocks">
@@ -365,7 +349,7 @@ function Dashboard(): JSX.Element {
                   </div>
                   <div className="recentlyadded_list">
                     <ul>
-                      {Recentlydata?.payload?.map((data: RecentlyData) => {
+                      {dashboardStore.recentlyAddedItems?.map((data: any) => {
                         return (
                           <Fragment>
                             <li>
@@ -410,7 +394,7 @@ function Dashboard(): JSX.Element {
                         aria-controls="pills-overivew"
                         aria-selected="true"
                       >
-                        My Favourites({favouritesData?.payload?.length})
+                        My Favourites({favouritesData?.length})
                       </button>
                     </li>
 
@@ -425,7 +409,7 @@ function Dashboard(): JSX.Element {
                         aria-controls="pills-changelog"
                         aria-selected="false"
                       >
-                        My Pending Items ({pendingItemsdata?.payload?.length})
+                        My Pending Items ({pendingItemsdata?.length})
                       </button>
                     </li>
                     <li className="nav-item" role="presentation">
@@ -439,7 +423,7 @@ function Dashboard(): JSX.Element {
                         aria-controls="pills-dependencies"
                         aria-selected="false"
                       >
-                        My Contributions ({userContribution?.payload?.length})
+                        My Contributions ({userContribution?.length})
                       </button>
                     </li>
                   </ul>
@@ -479,7 +463,7 @@ function Dashboard(): JSX.Element {
                           </div>
                         </div>
                         <div className="card_wrapper mt-3">
-                          {SearchFavouritesData?.map((data: FavouritesData) => {
+                          {SearchFavouritesData?.map((data: any) => {
                             return (
                               <Fragment>
                                 <div className="card">
@@ -564,54 +548,52 @@ function Dashboard(): JSX.Element {
                         </div>
 
                         <div className="card_wrapper mt-3">
-                          {SearchpendingItemData?.map(
-                            (data: PendingItemsData) => {
-                              return (
-                                <Fragment>
-                                  <div className="card">
-                                    <div className="card_head mb-2">
-                                      <div className="card_icon">
-                                        <img
-                                          src={data?.image_url}
-                                          alt="Technology"
-                                        />
-                                      </div>
-                                      <div className="cardhead_info">
-                                        <h4 className="card_title">
-                                          {" "}
-                                          <Link
-                                            to={`/Edit_Components/${data?.id}`}
-                                          >
-                                            {data?.display_name}
-                                          </Link>
-                                        </h4>
-                                        <div className="cardsub_title">
-                                          {data?.techstack?.name}
-                                        </div>
-                                      </div>
+                          {SearchpendingItemData?.map((data: any) => {
+                            return (
+                              <Fragment>
+                                <div className="card">
+                                  <div className="card_head mb-2">
+                                    <div className="card_icon">
+                                      <img
+                                        src={data?.image_url}
+                                        alt="Technology"
+                                      />
                                     </div>
-                                    <div className="card_body card_pl">
-                                      <p className="text-ellipsis--2 mb-2">
-                                        {data?.description}
-                                      </p>
-                                    </div>
-                                    <div className="card_footer">
-                                      <div className="card_footer_rt">
-                                        <div className="card_label mr-3"></div>
-                                        <div className="card_label mr-3"></div>
-                                        <div className="card_label_auth">
-                                          {data?.author_name} on{" "}
-                                          {moment(data?.draftAt)
-                                            .utc()
-                                            .format("MMM DD,YYYY")}
-                                        </div>
+                                    <div className="cardhead_info">
+                                      <h4 className="card_title">
+                                        {" "}
+                                        <Link
+                                          to={`/Edit_Components/${data?.id}`}
+                                        >
+                                          {data?.display_name}
+                                        </Link>
+                                      </h4>
+                                      <div className="cardsub_title">
+                                        {data?.techstack?.name}
                                       </div>
                                     </div>
                                   </div>
-                                </Fragment>
-                              );
-                            }
-                          )}
+                                  <div className="card_body card_pl">
+                                    <p className="text-ellipsis--2 mb-2">
+                                      {data?.description}
+                                    </p>
+                                  </div>
+                                  <div className="card_footer">
+                                    <div className="card_footer_rt">
+                                      <div className="card_label mr-3"></div>
+                                      <div className="card_label mr-3"></div>
+                                      <div className="card_label_auth">
+                                        {data?.author_name} on{" "}
+                                        {moment(data?.draftAt)
+                                          .utc()
+                                          .format("MMM DD,YYYY")}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </Fragment>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
@@ -680,8 +662,7 @@ function Dashboard(): JSX.Element {
                           )}
                         </div>
                       </div>
-                      {/* {userContribution?.payload?.data?.length >
-                      noOfContribution ? (
+                      {/* {userContribution?.data?.length > noOfContribution ? (
                         <div className="d-flex align-items-center justify-content-center py-4">
                           <Link
                             to=""
@@ -705,7 +686,7 @@ function Dashboard(): JSX.Element {
                       <i className="ra ra-components"></i> Components
                     </div>
                     <div className="quick_tatus_number">
-                      {totalComponent?.payload?.components}
+                      {dashboardStore?.components?.components}
                     </div>
                   </div>
                   <div className="quicklink_status_box bg_pink_dark">
@@ -713,7 +694,7 @@ function Dashboard(): JSX.Element {
                       <i className="ra ra-eye3"></i> Total Views
                     </div>
                     <div className="quick_tatus_number">
-                      {totalViews?.payload}
+                      {dashboardStore?.payloadViews?.payload}
                     </div>
                   </div>
                   <div className="quicklink_status_box bg_green">
@@ -721,7 +702,7 @@ function Dashboard(): JSX.Element {
                       <i className="ra ra-download2"></i> Total Downloads
                     </div>
                     <div className="quick_tatus_number">
-                      {totalDownloads?.payload}
+                      {dashboardStore?.payloadDownloads?.payload}
                     </div>
                   </div>
                 </div>
@@ -795,7 +776,7 @@ function Dashboard(): JSX.Element {
                       >
                         <div className="tab-content-body p-0">
                           <div className="leader_list_wrapper">
-                            {top3LeadersData?.map((data: Top3LeadersData) => {
+                            {top3LeadersData?.map((data: any) => {
                               return (
                                 <div className="leader_box">
                                   <div className="leader_img">
@@ -898,7 +879,7 @@ function Dashboard(): JSX.Element {
               </div>
               <div className="modal-body">
                 <div className="grid_wrapper grid-4 chooseint_wrapper">
-                  {SearchData?.map((data: SearchData) => {
+                  {SearchData?.map((data: any) => {
                     return (
                       <Fragment>
                         <div className="custom-control custom-checkbox image-checkbox">
@@ -926,7 +907,7 @@ function Dashboard(): JSX.Element {
                     );
                   })}
                 </div>
-                {categories?.payload?.length > noOfComponent ? (
+                {dashboardStore?.categories.length > noOfComponent ? (
                   <div className="d-flex align-items-center justify-content-center py-4">
                     <Link
                       to=""
@@ -955,4 +936,4 @@ function Dashboard(): JSX.Element {
   );
 }
 
-export default Dashboard;
+export default observer(Dashboard);
