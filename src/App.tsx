@@ -19,6 +19,7 @@ import AssignedForm from "./components/pages/IssueTracker/AssignedForm";
 import ReportedForm from "./components/pages/IssueTracker/ReportedForm";
 import AllIssuesForm from "./components/pages/IssueTracker/AllIssuesForm";
 import PageNotFound from "./components/pages/Page_NotFound";
+import PublicRoute from "./components/pages/route/PublicRoute";
 function App() {
   return (
     <Fragment>
@@ -65,7 +66,14 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
           <Route path="/logout" element={<LogOut />} />
           <Route
             path="/reusableComponent"
